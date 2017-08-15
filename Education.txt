@@ -1,0 +1,3 @@
+Simon Bolivar university:          John Hopkins University:               Academy of Financial Trading:
+- B.S. of Applied Math             - Data Science Specialization          - Trading Fundamentals
+      Finished: 2017                     Finished: In Course.                   Finished: 2016
