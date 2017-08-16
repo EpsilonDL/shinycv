@@ -12,9 +12,9 @@ datos.Educacion<- data.frame(Theme=c("Simulations","Machine Learning",
                                      "Time Series","Risk Management",
                                      "Team Management","Project Management",
                                      "Work Methologies","Team Work"),
-                             USB=c(1,0.4,0.7,0.9,0.7,1,0.6,1,0,0,0.3,1),
-                             JHU=c(0,0.6,0.3,0.1,0.3,0,0,0,0,0,0.5,0),
-                             AFT=c(0,0,0,0,0,0,0.4,0,0,0,0.2,0))
+                             USB=c(0.7,0.5,1,0.8,0.8,0.7,0.4,0.2,0,0,0.3,0.4),
+                             JHU=c(0.1,0.8,0.6,0.5,0.5,0,0,0,0,0,0.7,0),
+                             AFT=c(0,0,0,0,0,0,0.8,0,0,0,0.2,0))
 datos.Educacion$Theme<- as.character(datos.Educacion$Theme)
 datos.experiencia<- data.frame(Enterprise=c("Intraffic C.A.",
                                             "BCV (Central bank of Venezuela)",
@@ -80,6 +80,7 @@ ui<- fluidPage(title = "Eloy Alfonso Chang Castro",
                            tabPanel(
                                title = "Knowledge",
                                mainPanel(
+                                   titlePanel("Distribution of own knowledge"),
                                    selectInput("Conocimiento","Select a knowledge area",
                                                c("All","Data Science","Numerical Analisis",
                                                  "Simulations","Management","Others"),
@@ -111,60 +112,26 @@ server<- function(input,output){
     
         # Education ----
     
-    output$USBname<- renderText({
-        print("Simon Bolivar University:\n")
-    })
-    
-    output$USBCarrer<- renderText({
-        print("-B.S. of Applied Math\n")
-    })
-    
-    output$JHUname<- renderText({
-        print("John Hopkins University:\n")
-    })
-    
-    output$JHUCourse<- renderText({
-        print("-Data Science Specialization / Coursera (In Course)\n")
-    })
-    
-    output$AFTname<- renderText({
-        print("Academy of Financial Trading:\n")
-    })
-    
-    output$AFTCourse<- renderText({
-        print("-Trading fundamentals\n")
-    })
-    
     N<- nrow(datos.Educacion)
-    centers<- data.frame(x=runif(N),y=runif(N))
+    centers<- data.frame(x=runif(N),y=runif(N),Theme=datos.Educacion$Theme)
+    centers$Theme<- as.character(centers$Theme)
     
     output$PlotEducacion<- renderPlotly({
-        M<-ceiling(input$NumPoints/N)
-        q<- names(datos.Educacion) == input$Institute
-        Topic<- character();x=numeric();y=numeric();text=character()
-        for(i in 1:N){
-            aux<- datos.Educacion[i,q] != 0
-            if(aux){
-                tmp<- ceiling(M*datos.Educacion[i,q])
-                Topic<- c(Topic,rep(datos.Educacion$Theme[i],tmp))
-                text<- c(text,rep(paste(input$Institute,
-                                    datos.Educacion$Theme[i]),tmp))
-                x<- c(x,rnorm(tmp,centers$x[i],0.05))
-                y<- c(y,rnorm(tmp,centers$y[i],0.05))
-            }
-        }
-        puntos<- data.frame(Topic,x,y,text)
-        graph<- plot_ly(data = puntos, x = ~x, y = ~y,type = "scatter",
-                        color = ~Topic,text = ~text)
+        q<- which(names(datos.Educacion) == input$Institute)
+        centers<- merge(centers,datos.Educacion[,c(1,q)], by = "Theme")
+        centers$text<- paste(input$Institute,"|",centers$Theme)
+        names(centers)<- c("Theme","x","y","Institute","Text")
+        graph<- plot_ly(data = centers, x = ~x, y = ~y, color = ~Theme, size = ~Institute,
+                        text = ~Text)
         axis<- list(title = "", showgrid = FALSE,showticklabels = FALSE, 
                     zeroline = FALSE, autoticks = FALSE, range = c(-0.2,1.2))
         graph <- layout(
             graph,
             title = paste("Education on",input$Institute),
+            showlegend = FALSE,
             xaxis = axis,
             yaxis = axis
         ) 
-        graph
     })
     
         # Experience ----
