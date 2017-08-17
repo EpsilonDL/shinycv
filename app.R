@@ -60,9 +60,7 @@ ui<- fluidPage(title = "Eloy Alfonso Chang Castro",
                                selectInput("Institute","Select a institute:",
                                            selected = "USB",
                                            choices = c("USB","JHU","AFT")),
-                               plotlyOutput("PlotEducacion"),
-                               sliderInput("NumPoints","Number of points",
-                                           min = 100,max=1000,value = 500)
+                               plotlyOutput("PlotEducacion")
                            ),
                            # Experience ----
                            tabPanel(
@@ -119,8 +117,9 @@ server<- function(input,output){
     output$PlotEducacion<- renderPlotly({
         q<- which(names(datos.Educacion) == input$Institute)
         centers<- merge(centers,datos.Educacion[,c(1,q)], by = "Theme")
-        centers$text<- paste(input$Institute,"|",centers$Theme)
-        names(centers)<- c("Theme","x","y","Institute","Text")
+        names(centers)<- c("Theme","x","y","Institute")
+        centers$Text<- paste(input$Institute," | ",centers$Theme," | ",
+                             round(centers$Institute*100),"%",sep = "")
         graph<- plot_ly(data = centers, x = ~x, y = ~y, color = ~Theme, size = ~Institute,
                         text = ~Text)
         axis<- list(title = "", showgrid = FALSE,showticklabels = FALSE, 
@@ -132,6 +131,7 @@ server<- function(input,output){
             xaxis = axis,
             yaxis = axis
         ) 
+        graph
     })
     
         # Experience ----
